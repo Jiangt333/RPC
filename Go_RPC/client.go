@@ -63,10 +63,11 @@ func client(server_ip string, server_port string, server_name string, server_arg
 	// 创建了一个json.Decoder并将其与reader关联
 	decoder := json.NewDecoder(reader)
 	// 解码的值赋值给response
-	var response = make(map[string]string)
+
 	if server_name == "list" {
 		// 打印服务列表
 		// 通过decoder.Decode方法来解码数据，并将解码结果赋值给response变量
+		var response = make(map[string]map[string]string)
 		err = decoder.Decode(&response)
 		if err != nil {
 			// 从服务端接收响应时，读数据导致的异常/超时
@@ -74,12 +75,13 @@ func client(server_ip string, server_port string, server_name string, server_arg
 			return
 		}
 		fmt.Println("服务列表：")
-		for k, v := range response {
+		for k, v := range response["result"] {
 			fmt.Printf("函数名：%s; 所需参数：%s\n", k, v)
 		}
 	} else {
 		// 返回服务调用结果
 		// 解码的值赋值给response
+		var response = make(map[string]string)
 		err = decoder.Decode(&response)
 		if err != nil {
 			// 从服务端接收响应时，读数据导致的异常/超时
