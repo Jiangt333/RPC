@@ -45,6 +45,17 @@ func (s *MyService) add(sarg1 string, sarg2 string) float64 {
 	return result
 }
 
+// 三个数相加
+func (s *MyService) addd(sarg1 string, sarg2 string, sarg3 string) float64 {
+	//s.serviceType = "num"
+	arg1, _ := strconv.ParseFloat(sarg1, 64)
+	arg2, _ := strconv.ParseFloat(sarg2, 64)
+	arg3, _ := strconv.ParseFloat(sarg3, 64)
+	result := arg1 + arg2 + arg3
+	fmt.Println("addd！")
+	return result
+}
+
 // 两个数相减
 func (s *MyService) sub(sarg1 string, sarg2 string) float64 {
 	arg1, _ := strconv.ParseFloat(sarg1, 64)
@@ -200,7 +211,7 @@ func handleRPCRequest(conn net.Conn, service *MyService) {
 			// 返回结果给客户端
 			var replyMap = make(map[string]string)
 			var reply string
-			if uRPCData.FuncName == "add" || uRPCData.FuncName == "sub" || uRPCData.FuncName == "multy" || uRPCData.FuncName == "minus" || uRPCData.FuncName == "square" || uRPCData.FuncName == "cube" {
+			if uRPCData.FuncName == "add" || uRPCData.FuncName == "addd" || uRPCData.FuncName == "sub" || uRPCData.FuncName == "multy" || uRPCData.FuncName == "minus" || uRPCData.FuncName == "square" || uRPCData.FuncName == "cube" {
 				re := fmt.Sprintf("%f", returnVal[0].Interface().(float64))
 				reply = "the result is: " + re
 				replyMap["result"] = reply
@@ -268,6 +279,7 @@ func main() {
 	s := NewMyService()
 	// 注册RPC服务
 	s.Register("add", s.add, "add", "两个数字")
+	s.Register("addd", s.addd, "addd", "三个数字")
 	s.Register("sub", s.sub, "sub", "两个数字")
 	s.Register("multi", s.multi, "multi", "两个数字")
 	s.Register("minus", s.minus, "minus", "一个数字")
