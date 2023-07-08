@@ -2,6 +2,7 @@ package client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -23,7 +24,7 @@ public class RPCClient {
 
     public Object invoke(String serviceName, String methodName, Object args) throws IOException,RuntimeException {
     	Socket socket = new Socket();
-    	socket.connect(new InetSocketAddress(InetAddress.getByName(host),port),10000);
+    	socket.connect(new InetSocketAddress(InetAddress.getByName(host),port),10000);//
     	socket.setSoTimeout(5000);
         OutputStream out = socket.getOutputStream();
         InputStream in = socket.getInputStream();
@@ -41,14 +42,17 @@ public class RPCClient {
         if (response.containsKey("exception")) {
             throw new RuntimeException(response.getString("exception"));
         }
+		socket.close();
         return response.get("result");
     }
  
     public static void main(String[] args) throws Exception {
-    	String[] help = {"-i Server IP address", "-p Server Port", "-s Server ServiceName", "-m Server JAVA:MethodName"};
+    	String[] help = {"-i Server IP address", "-p Server port", "-s Server service", "-m Server JAVA:MethodName"};
     	String ip = "192.168.43.50";
-    	int port = 8001;
-		Object[] params;
+    	int port = 8002;
+		String serviceName = null;
+        String methodName = null;
+		Object[] params = null;
     	if(args.length>0)
     	{
     		if(args[0].equals("-h"))
@@ -60,19 +64,26 @@ public class RPCClient {
     		ip = args[1];
         	String portString = args[3];
         	port = Integer.parseInt(portString);
-        	String serviceName;
-        	String methodName;
-        	if(args[0].equals("-i")&& args[2].equals("-p")&&args[4].equals("-s"))
+			if(args[0].equals("-i")&& args[2].equals("-p")&&args[4].equals("-s"))
         	{
+				ip = args[1];
+				String portstr = args[3];
+				port = Integer.parseInt(portstr);
         		serviceName = args[5];
-        		methodName = null;
-				params = Arrays.copyOfRange(args, 6, args.length-6);
-        	}
-        	else if(args[0].equals("-i")&& args[2].equals("-p")&&args[4].equals("-s")&&args[6].equals("-m"))
-        	{
-        		serviceName = args[5];
-        		methodName  = args[7];
-				params = Arrays.copyOfRange(args, 8, args.length-8);
+				if(args.length>6)
+				{
+					if(args[6].equals("-m"))
+					{
+						methodName  = args[7];
+						params = Arrays.copyOfRange(args, 8, args.length);
+					}
+					else
+					{
+						params = Arrays.copyOfRange(args, 6, args.length);
+					}
+					
+				}	
+				
         	}
         	else {
         		System.out.println("启动参数输入错误");
@@ -80,14 +91,12 @@ public class RPCClient {
     		}	  
     		
     	}
-    	  
  	    RPCClient client = new RPCClient(ip, port);   
- 	    Object servicelist = client.invoke("list", "", params1);
+ 	    Object servicelist = client.invoke(serviceName, methodName, params);
  	    System.out.println(servicelist);
- 	
     	
 }
 }
-     
+    
 
 

@@ -39,7 +39,7 @@ public class RPCServer {
     	//serverSocket.bind(new InetSocketAddress("192.168.43.50", port));
         while (true) {	
         	final Socket socket = serverSocket.accept();
-        	socket.setSoTimeout(5000);
+        	socket.setSoTimeout(2000);
         	InetAddress ip = socket.getInetAddress();   
             ExecutorService executor = Executors.newFixedThreadPool(200);    
             FutureTask<String> future =    
@@ -54,7 +54,6 @@ public class RPCServer {
                              JSONObject request = JSON.parseObject(requestJson);
                              String serviceName = request.getString("FuncName");
                              String methodName = request.getString("methodName");
-
                              Object service = null;         
                              Object result = null;
                              if (serviceName.equals("list")) 
@@ -112,8 +111,7 @@ public class RPCServer {
             executor.execute(future);      
             try {    
                 System.out.println(future.get(10000, TimeUnit.MILLISECONDS)); 
-            }catch (TimeoutException e) {  
-                e.printStackTrace();  
+            }catch (TimeoutException e) {    
                 break;    
             } finally {    
                 executor.shutdown();    
@@ -139,7 +137,6 @@ public class RPCServer {
        		 Map<String, Object> method = new HashMap<String, Object>();
        		 method.put("service", methods[i].getName());
        		 method.put("return", methods[i].getReturnType());
-       		 method.put("params", methods[i].getParameterTypes());
        		 serviceList.add(method);
     		}
     	}
@@ -148,7 +145,7 @@ public class RPCServer {
     
     public static void main(String args[]) throws IOException, InterruptedException, ExecutionException 
     {   
-    	RPCServer server = new RPCServer(8001);
+    	RPCServer server = new RPCServer(8002);
     	Test test = new TestService();
     	server.register("default", test);
     	server.start();
